@@ -1,0 +1,1 @@
+Fixture download payload for browser-layer integration tests.

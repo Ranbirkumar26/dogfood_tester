@@ -1,0 +1,7 @@
+# Local tooling and OS noise at the workspace root; the project keeps its own
+# .gitignore inside website-ai-agent/.
+.DS_Store
+.claude/
+.venv/
+venv/
+__pycache__/

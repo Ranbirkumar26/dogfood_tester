@@ -1,0 +1,101 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "website-ai-agent"
+version = "0.1.0"
+description = "Autonomous website exploration and QA agent: real-browser exploration, bug and accessibility detection, generated reports and documentation."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "website-ai-agent contributors" }]
+keywords = ["ai-agent", "qa", "playwright", "langgraph", "accessibility", "testing"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+]
+
+# Dependencies are added in the phase that uses them, so every entry is justified:
+#   pydantic          - validation and serialization at every boundary (design D7)
+#   pydantic-settings - layered config: defaults < TOML < .env < env < overrides (Phase 2)
+#   rich              - human log sink and CLI rendering (Phase 2, reused Phase 13)
+#   playwright        - the browser engine behind BrowserSession (Phase 3, design D5)
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "rich>=13.7",
+    "playwright>=1.45",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.urls]
+Homepage = "https://github.com/placeholder/website-ai-agent"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/website_agent"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "SIM",      # simplify
+    "C4",       # comprehensions
+    "RET",      # return hygiene
+    "PT",       # pytest style
+    "N",        # naming
+]
+ignore = [
+    "SIM108",   # ternary preference hurts readability in guard clauses
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["N802"]  # test names may embed CamelCase class names under test
+
+[tool.mypy]
+python_version = "3.11"
+mypy_path = "src"
+packages = ["website_agent"]
+strict = true
+warn_unreachable = true
+show_error_codes = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q --strict-markers"
+markers = [
+    "integration: touches a real browser or local fixture server",
+]
+
+[tool.coverage.run]
+source = ["src/website_agent"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "\\.\\.\\.",
+]

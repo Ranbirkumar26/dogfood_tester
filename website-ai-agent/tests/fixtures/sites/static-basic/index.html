@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Static Basic - Home</title>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main">
+      <a href="/index.html">Home</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+      <a href="/missing-page.html">Broken Link</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Static Basic Fixture</h1>
+    <p>Deterministic playground for browser-layer integration tests.</p>
+    <button data-testid="cta-primary" id="cta" type="button" onclick="document.getElementById('outcome').textContent = 'clicked'">
+      Get Started
+    </button>
+    <button type="button" onclick="alert('intrusive alert')">Trigger Alert</button>
+    <button type="button" onclick="window.open('/about.html', '_blank')">Open Popup</button>
+    <a href="/files/report.txt" download="report.txt" data-testid="download-report">Download Report</a>
+    <p id="outcome" data-testid="outcome"></p>
+    <a href="#" style="display:none" id="hidden-link">Hidden Link</a>
+  </main>
+  <script>
+    console.error('fixture-console-error-marker');
+    fetch('/missing.json').catch(() => {});
+  </script>
+</body>
+</html>

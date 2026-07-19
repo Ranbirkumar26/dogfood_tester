@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Static Basic - Contact</title>
+</head>
+<body>
+  <nav aria-label="Main">
+    <a href="/index.html">Home</a>
+    <a href="/about.html">About</a>
+    <a href="/contact.html">Contact</a>
+  </nav>
+  <main>
+    <h1>Contact</h1>
+    <form id="contact-form" onsubmit="event.preventDefault(); document.getElementById('form-result').textContent = 'submitted:' + document.getElementById('email').value + ':' + document.getElementById('topic').value;">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com">
+
+      <label for="topic">Topic</label>
+      <select id="topic" name="topic">
+        <option value="">Choose a topic</option>
+        <option value="bugs">Bug report</option>
+        <option value="sales">Sales</option>
+      </select>
+
+      <input type="text" aria-label="Unlabeled extra" name="extra">
+
+      <button type="submit" data-testid="submit-contact">Send message</button>
+    </form>
+    <p id="form-result" data-testid="form-result"></p>
+    <script>
+      // localStorage write lets storage-state tests assert round-tripping.
+      localStorage.setItem('fixture-key', 'fixture-value');
+    </script>
+  </main>
+</body>
+</html>
