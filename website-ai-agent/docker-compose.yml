@@ -1,0 +1,44 @@
+# Local orchestration for the Website AI Agent.
+#
+# Two services share the same image:
+#   api  - the FastAPI server (default here), for driving runs over HTTP
+#   cli  - a one-shot profile for `docker compose run cli run <url>`
+#
+# Both mount a named volume for run artifacts and read secrets from the environment (never
+# baked into the image). Copy .env.example to .env and set WA_LLM__API_KEY for a hosted
+# provider, or point WA_LLM__BASE_URL at a local model for zero-cost runs.
+
+services:
+  api:
+    build: .
+    image: website-ai-agent:latest
+    command: ["python", "-m", "website_agent.api"]
+    environment:
+      WA_API_HOST: "0.0.0.0"
+      WA_API_PORT: "8000"
+      # Provider configuration comes from .env (see env_file below).
+    env_file:
+      - path: .env
+        required: false
+    ports:
+      - "8000:8000"
+    volumes:
+      - reports:/data/reports
+    restart: unless-stopped
+    # The browser can spike shared memory; give Chromium room so tabs do not crash.
+    shm_size: "1gb"
+
+  # One-shot CLI runs: `docker compose run --rm cli run https://example.com`
+  cli:
+    build: .
+    image: website-ai-agent:latest
+    profiles: ["cli"]
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - reports:/data/reports
+    shm_size: "1gb"
+
+volumes:
+  reports:

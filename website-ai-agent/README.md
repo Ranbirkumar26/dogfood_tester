@@ -24,7 +24,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 12 | Evaluation harness | Done |
 | 13 | CLI | Done |
 | 14 | FastAPI server | Done |
-| 15 | Docker | Pending |
+| 15 | Docker | Done |
 | 16 | CI/CD | Pending |
 | 17 | Open source preparation | Pending |
 | 18 | Final audit | Pending |
@@ -38,6 +38,17 @@ bootstrap -> planner -> executor -> reviewer -> decide -> (loop | finalize)
 ```
 
 A LangGraph state machine with durable checkpoints drives a plan-execute-review loop over a wrapped Playwright session. Element addressing uses the accessibility tree with synthesized stable selectors; the model can only act on elements that actually exist. Budgets (steps, tokens, dollars, wall-clock) are enforced by a deterministic router, and every run is resumable from its last checkpoint.
+
+## Quickstart
+
+```bash
+pip install -e ".[dev]"
+playwright install chromium
+website-agent run https://example.com --max-steps 40   # reports land in reports/<run_id>/output/
+website-agent graph                                     # print the agent's state machine
+```
+
+Point `WA_LLM__BASE_URL` at a local model (Ollama, vLLM) for zero-cost runs, or set `WA_LLM__API_KEY` for a hosted provider. Docker usage: [`docs/guides/docker.md`](docs/guides/docker.md).
 
 ## Safety posture
 

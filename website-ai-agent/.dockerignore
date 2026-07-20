@@ -1,0 +1,26 @@
+# Keep the build context small and secret-free.
+.git/
+.github/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Never ship secrets or local run output into the image.
+.env
+*.local.toml
+reports/
+!reports/.gitkeep
+
+# Dev-only trees not needed at runtime.
+tests/
+evaluation/
+docs/
+examples/
+.DS_Store
