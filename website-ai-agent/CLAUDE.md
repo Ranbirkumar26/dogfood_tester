@@ -6,7 +6,7 @@ Read `docs/architecture/overview.md` first. Decisions D1..D14 there are binding;
 
 18-phase spec from the project owner, strict order, approval gate after every phase. Each phase ends with the audit block: deliverables, files, remaining work, manual test checklist, automated test results, architecture validation, production readiness score. Never start phase N+1 without explicit approval of phase N.
 
-Phase status: 1-3 done (architecture; foundation; browser tooling with real-chromium integration tests against tests/fixtures/sites/static-basic). 137 tests, 95 percent coverage, ruff plus mypy strict clean. Next: Phase 4 (LLM tooling) awaiting approval.
+Phase status: 1-4 done (architecture; foundation; browser tooling; LLM tooling: ModelManager over openai SDK with structured outputs/repair, token+cost ledger, sliding-window rate limiter, record/replay cassettes, PromptManager). 188 tests, 96 percent coverage, ruff plus mypy strict clean. Committing and pushing to GitHub after each phase (standing order). Next: Phase 5 (state management).
 
 Dev commands: `.venv/bin/python -m pytest --cov`, `.venv/bin/ruff check .`, `.venv/bin/ruff format .`, `.venv/bin/mypy`. Python 3.13 venv at `.venv/`.
 
@@ -17,6 +17,9 @@ Dev commands: `.venv/bin/python -m pytest --cov`, `.venv/bin/ruff check .`, `.ve
 - 2026-07-20: LangChain proper not a dependency; LangGraph only (overview.md D4). Revisit only with a concrete component need.
 - 2026-07-20: Memory is graph plus signature registry, deliberately not a vector store (data-flow.md s4).
 - 2026-07-20: `bootstrap` and `finalize` nodes added around the spec's planner/executor/reviewer/decision loop (state-machine.md).
+- 2026-07-20: Prompt templates use `$var` (string.Template); `PromptManager.render(name, variables_dict)` takes a mapping not kwargs, so a template variable may be named `name`. Strict rendering: missing and unused variables both raise ConfigError.
+- 2026-07-20: Structured LLM output does not depend on provider-side schema enforcement (varies across OpenAI-compatible servers): schema in prompt + json_object mode + validate + one repair reprompt. Cassette keys hash role/model/messages/schema so drift fails loudly.
+- 2026-07-20: pytest uses `--import-mode=importlib` + `pythonpath=["."]` so same-basename test modules coexist and shared test helpers import as `tests.unit.<pkg>._fakes`. Editable install `.pth` goes stale after dependency changes; `.venv/bin/pip install -e ".[dev]"` fixes ModuleNotFoundError: website_agent.
 
 ## Deferred features (owner's words to be captured when deferred; none yet)
 

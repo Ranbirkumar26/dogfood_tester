@@ -1,0 +1,2 @@
+# Committed LLM response cassettes for replay-mode tests (design D13).
+# Role-level cassettes are recorded and committed in phases 6-9 when the roles exist.

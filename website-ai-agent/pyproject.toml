@@ -25,11 +25,13 @@ classifiers = [
 #   pydantic-settings - layered config: defaults < TOML < .env < env < overrides (Phase 2)
 #   rich              - human log sink and CLI rendering (Phase 2, reused Phase 13)
 #   playwright        - the browser engine behind BrowserSession (Phase 3, design D5)
+#   openai            - OpenAI-compatible wire protocol for every provider (Phase 4, design D3)
 dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "rich>=13.7",
     "playwright>=1.45",
+    "openai>=1.40",
 ]
 
 [project.optional-dependencies]
@@ -83,7 +85,10 @@ show_error_codes = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
-addopts = "-q --strict-markers"
+# importlib mode lets same-basename test modules (e.g. two test_manager.py) coexist without
+# __init__.py sprawl; pythonpath makes the tests package importable for shared test helpers.
+addopts = "-q --strict-markers --import-mode=importlib"
+pythonpath = ["."]
 markers = [
     "integration: touches a real browser or local fixture server",
 ]

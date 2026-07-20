@@ -1,0 +1,2 @@
+# Role prompt templates (planner.md, executor.md, reviewer.md) land in their phases (6-8).
+# Each template has a system section and a user section split by a ---USER--- marker line.

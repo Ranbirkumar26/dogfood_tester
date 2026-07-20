@@ -31,6 +31,14 @@ class LogFormat(enum.StrEnum):
     JSON = "json"
 
 
+class LlmMode(enum.StrEnum):
+    """Provider call mode (design D13): live calls, record to cassettes, or replay."""
+
+    LIVE = "live"
+    RECORD = "record"
+    REPLAY = "replay"
+
+
 class LlmSettings(BaseModel):
     """Provider endpoint and default generation parameters (design D3)."""
 
@@ -42,6 +50,10 @@ class LlmSettings(BaseModel):
     temperature: float = Field(default=0.0, ge=0.0, le=2.0)
     max_output_tokens: int = Field(default=4096, ge=1)
     request_timeout_s: float = Field(default=60.0, gt=0)
+    requests_per_minute: int = Field(default=60, ge=0)  # 0 disables client-side limiting
+    json_mode: bool = True  # send response_format json_object for structured calls
+    mode: LlmMode = LlmMode.LIVE
+    cassette_dir: Path | None = None  # required for record/replay modes
 
 
 class BrowserSettings(BaseModel):
