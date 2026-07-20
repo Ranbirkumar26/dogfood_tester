@@ -25,7 +25,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 13 | CLI | Done |
 | 14 | FastAPI server | Done |
 | 15 | Docker | Done |
-| 16 | CI/CD | Pending |
+| 16 | CI/CD | Done |
 | 17 | Open source preparation | Pending |
 | 18 | Final audit | Pending |
 
