@@ -1,0 +1,21 @@
+# Ground truth for the static-basic fixture site (tests/fixtures/sites/static-basic).
+# kind values align 1:1 with QA-engine finding kinds so matching is mechanical.
+site: static-basic
+expected_reachable_pages: 3
+expected_interactive_elements: 12
+defects:
+  - id: GT-001
+    kind: console_error
+    location: "/index.html"
+    severity: major
+    notes: "index.html logs 'fixture-console-error-marker' on load"
+  - id: GT-002
+    kind: http_error
+    location: "/missing.json"
+    severity: major
+    notes: "index.html fetches /missing.json which 404s"
+  - id: GT-003
+    kind: missing_label
+    location: "/contact.html"
+    severity: major
+    notes: "contact form has one input with no accessible name"

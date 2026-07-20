@@ -1,0 +1,11 @@
+# Explore the static-basic fixture site and check coverage and bug detection.
+name: explore-static-basic
+site: static-basic
+mode: explore
+max_steps: 40
+max_usd: 0.0        # replay/scripted model: zero cost
+max_wall_seconds: 300
+success:
+  min_page_coverage: 0.6
+  min_bug_recall: 0.3
+  min_bug_precision: 0.5

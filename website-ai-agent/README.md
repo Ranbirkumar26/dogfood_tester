@@ -21,7 +21,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 9 | LangGraph orchestration | Done |
 | 10 | QA engine | Done |
 | 11 | Documentation engine | Done |
-| 12 | Evaluation harness | Pending |
+| 12 | Evaluation harness | Done |
 | 13 | CLI | Pending |
 | 14 | FastAPI server | Pending |
 | 15 | Docker | Pending |
