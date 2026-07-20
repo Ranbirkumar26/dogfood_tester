@@ -32,6 +32,7 @@ from website_agent.logging import bind_run_context, get_logger
 from website_agent.memory.service import MemoryService
 from website_agent.planner.planner import Planner
 from website_agent.prompts.manager import PromptManager
+from website_agent.qa.engine import QaEngine
 from website_agent.reviewer.reviewer import Reviewer
 from website_agent.state.agent_state import AgentState
 from website_agent.state.models import Budgets, GoalSpec, RunPolicy, RunResult
@@ -92,6 +93,8 @@ class AgentRunner:
                 memory=memory,
                 ledger=ledger,
                 clock=self._clock,
+                store=store,
+                qa_engine=QaEngine(),
                 max_attempts=spec.max_attempts,
                 loop_limit=spec.loop_limit,
             )

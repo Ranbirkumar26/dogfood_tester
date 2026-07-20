@@ -21,7 +21,9 @@ from website_agent.agent.loop_detector import (
     poison_branch,
     state_signature,
 )
+from website_agent.browser.models import PageSnapshot
 from website_agent.browser.session import BrowserSession
+from website_agent.core.artifacts import ArtifactStore
 from website_agent.core.clock import Clock
 from website_agent.core.types import StopReason
 from website_agent.executor.executor import Executor
@@ -33,6 +35,8 @@ from website_agent.memory.service import MemoryService
 from website_agent.planner.models import PlanStep
 from website_agent.planner.planner import Planner
 from website_agent.planner.render import render_inventory
+from website_agent.qa.engine import QaEngine
+from website_agent.qa.models import QaContext
 from website_agent.reviewer.models import ReviewDecision
 from website_agent.reviewer.reviewer import Reviewer
 from website_agent.state.models import ActionRecord, RunResult
@@ -51,6 +55,8 @@ class GraphDeps:
     memory: MemoryService
     ledger: TokenLedger
     clock: Clock
+    store: ArtifactStore
+    qa_engine: QaEngine
     max_attempts: int = 2
     loop_limit: int = 5
 
@@ -72,7 +78,12 @@ class GraphNodes:
             current_snapshot=snapshot, counters=started, memory=self._d.memory.state
         )
         log.info("bootstrap_complete", url=snapshot.url, elements=len(snapshot.elements))
-        return {"agent": new_agent, "plan": None, "current_step": None}
+        return {
+            "agent": new_agent,
+            "plan": None,
+            "current_step": None,
+            "visited_snapshots": (snapshot,),
+        }
 
     async def planner(self, state: GraphState) -> dict[str, object]:
         """Produce a fresh plan from the current snapshot and memory."""
@@ -112,8 +123,10 @@ class GraphNodes:
 
         result = await self._d.executor.execute(step, self._d.session, self._d.memory)
         agent = state.agent.append_action(_action_record(step, result, self._d.clock))
+        visited = state.visited_snapshots
         if result.snapshot_after is not None:
             agent = agent.with_updates(current_snapshot=result.snapshot_after)
+            visited = _accumulate_snapshot(visited, result.snapshot_after)
         agent = agent.with_updates(memory=self._d.memory.state)
 
         return {
@@ -122,6 +135,7 @@ class GraphNodes:
             "current_step": step,
             "step_attempt": attempt,
             "last_result": result,
+            "visited_snapshots": visited,
         }
 
     async def reviewer(self, state: GraphState) -> dict[str, object]:
@@ -191,12 +205,24 @@ class GraphNodes:
         return {"agent": agent, "next_edge": outcome.edge.value}
 
     async def finalize(self, state: GraphState) -> dict[str, object]:
-        """Close the run: persist storage state and build the RunResult."""
+        """Close the run: run QA, persist storage state and the QA report, build the RunResult."""
         agent = state.agent
+        report = self._d.qa_engine.analyze(
+            QaContext(
+                run_id=agent.run_id,
+                candidates=state.qa_candidates,
+                snapshots=state.visited_snapshots,
+            )
+        )
+        try:
+            self._d.store.save_json("qa", "findings.json", report.model_dump(mode="json"))
+        except Exception as exc:  # noqa: BLE001 - a report write must not fail the run
+            log.warning("qa_report_write_failed", reason=str(exc))
         try:
             await self._d.session.save_storage_state()
         except Exception as exc:  # noqa: BLE001 - finalize must never fail the run
             log.warning("finalize_storage_state_failed", reason=str(exc))
+
         totals = self._d.ledger.totals()
         # Reached without a stop reason only when the plan ran dry: frontier exhausted.
         stop_reason = agent.stop_reason or StopReason.FRONTIER_EXHAUSTED
@@ -205,7 +231,7 @@ class GraphNodes:
             stop_reason=stop_reason,
             steps=agent.counters.steps,
             pages_visited=self._d.memory.graph.page_count,
-            findings=len(state.qa_candidates),
+            findings=report.counts.total,
             tokens=totals.total_tokens,
             cost_usd=totals.cost_usd,
             started_at=agent.counters.started_at,
@@ -220,7 +246,11 @@ class GraphNodes:
             findings=result.findings,
             cost_usd=result.cost_usd,
         )
-        return {"agent": agent.with_updates(stop_reason=stop_reason), "run_result": result}
+        return {
+            "agent": agent.with_updates(stop_reason=stop_reason),
+            "run_result": result,
+            "qa_report": report,
+        }
 
 
 def route_after_decide(state: GraphState) -> str:
@@ -240,6 +270,15 @@ def _current_signature(state: GraphState) -> str:
     return state_signature(
         url=result.url_after, content_hash=content_hash, last_action_signature=last_action
     )
+
+
+def _accumulate_snapshot(
+    visited: tuple[PageSnapshot, ...], snapshot: PageSnapshot
+) -> tuple[PageSnapshot, ...]:
+    """Append a snapshot only if its content-class is new (dedupe by hash for whole-run QA)."""
+    if any(existing.snapshot_hash == snapshot.snapshot_hash for existing in visited):
+        return visited
+    return (*visited, snapshot)
 
 
 def _action_record(step: PlanStep, result: ExecutionResult, clock: Clock) -> ActionRecord:

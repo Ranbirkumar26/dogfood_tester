@@ -28,6 +28,7 @@ from website_agent.planner.models import (
 )
 from website_agent.planner.planner import Planner
 from website_agent.prompts.manager import PromptManager
+from website_agent.qa.engine import QaEngine
 from website_agent.reviewer.models import ReviewDecision, ReviewerJudgement, ReviewVerdict
 from website_agent.reviewer.reviewer import Reviewer
 from website_agent.state.agent_state import AgentState
@@ -54,6 +55,22 @@ class FakePage:
 
 class FakeScreens:
     async def capture(self, page: object, tag: str) -> None:
+        return None
+
+
+class _MemStore:
+    """Minimal ArtifactStore stand-in: swallows saves, used where persistence is irrelevant."""
+
+    def save_bytes(self, kind: str, name: str, data: bytes) -> object:
+        return None
+
+    def save_text(self, kind: str, name: str, text: str) -> object:
+        return None
+
+    def save_json(self, kind: str, name: str, payload: object) -> object:
+        return None
+
+    def path_for(self, ref: object) -> object:
         return None
 
 
@@ -131,6 +148,8 @@ def _deps(fixed_clock: FixedClock) -> GraphDeps:
         memory=memory,
         ledger=TokenLedger(PriceTable(), fixed_clock),
         clock=fixed_clock,
+        store=_MemStore(),
+        qa_engine=QaEngine(),
     )
 
 

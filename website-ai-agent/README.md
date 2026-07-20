@@ -19,7 +19,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 7 | Executor | Done |
 | 8 | Reviewer | Done |
 | 9 | LangGraph orchestration | Done |
-| 10 | QA engine | Pending |
+| 10 | QA engine | Done |
 | 11 | Documentation engine | Pending |
 | 12 | Evaluation harness | Pending |
 | 13 | CLI | Pending |

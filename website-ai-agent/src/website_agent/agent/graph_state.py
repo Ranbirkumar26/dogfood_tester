@@ -13,8 +13,10 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict
 
+from website_agent.browser.models import PageSnapshot
 from website_agent.executor.models import ExecutionResult
 from website_agent.planner.models import Plan, PlanStep
+from website_agent.qa.models import QaReport
 from website_agent.reviewer.models import QaCandidate, ReviewVerdict
 from website_agent.state.agent_state import AgentState
 from website_agent.state.models import RunResult
@@ -36,6 +38,8 @@ class GraphState(BaseModel):
     last_result: ExecutionResult | None = None
     last_verdict: ReviewVerdict | None = None
     qa_candidates: tuple[QaCandidate, ...] = ()
+    visited_snapshots: tuple[PageSnapshot, ...] = ()  # distinct pages, for whole-run QA
     next_edge: str = ""
     branch_poisoned: bool = False
     run_result: RunResult | None = None
+    qa_report: QaReport | None = None
