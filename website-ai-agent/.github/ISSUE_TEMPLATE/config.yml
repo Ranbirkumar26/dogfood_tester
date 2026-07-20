@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or discussion
+    url: https://github.com/placeholder/website-ai-agent/discussions
+    about: Ask usage questions and discuss ideas here.
+  - name: Security report
+    url: https://github.com/placeholder/website-ai-agent/security/advisories/new
+    about: Report a vulnerability privately (do not open a public issue).

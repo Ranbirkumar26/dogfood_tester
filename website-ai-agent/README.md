@@ -1,12 +1,18 @@
 # Website AI Agent
 
+![CI](https://github.com/placeholder/website-ai-agent/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+![Coverage](https://img.shields.io/badge/coverage-~97%25-brightgreen)
+![Type checked: mypy strict](https://img.shields.io/badge/mypy-strict-blue)
+
 Autonomous website exploration and QA agent. Point it at a URL; it operates a real browser to explore pages, click and fill its way through workflows, watch the console and network, detect functional bugs and accessibility issues, and produce QA reports, user-flow graphs, and generated documentation.
 
-Built on Python, LangGraph, and Playwright, with a provider-agnostic LLM layer (OpenAI-compatible: OpenAI, Ollama, Groq, OpenRouter, vLLM). Local models make development and CI free; paid APIs are opt-in.
+Built on Python, LangGraph, and Playwright, with a provider-agnostic LLM layer (OpenAI-compatible: OpenAI, Ollama, Groq, OpenRouter, vLLM). Local models make development and CI free; paid APIs are opt-in. See a real [sample report](examples/sample-run/qa_report.md).
 
 ## Status
 
-Pre-release. Architecture phase complete; implementation in progress.
+Pre-release, feature-complete through the core build. All layers implemented and tested (unit plus real-browser integration), CI green, packaged for Docker and PyPI.
 
 | Phase | Scope | Status |
 |---|---|---|
@@ -26,7 +32,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 14 | FastAPI server | Done |
 | 15 | Docker | Done |
 | 16 | CI/CD | Done |
-| 17 | Open source preparation | Pending |
+| 17 | Open source preparation | Done |
 | 18 | Final audit | Pending |
 
 ## Design
@@ -54,6 +60,35 @@ Point `WA_LLM__BASE_URL` at a local model (Ollama, vLLM) for zero-cost runs, or 
 
 Domain-allowlisted navigation, a destructive-action policy (safe-explore by default), secret redaction in all logs and reports, and no CAPTCHA or bot-detection circumvention. Intended targets: your own sites, staging environments, and the bundled fixture sites.
 
+## Roadmap
+
+- Semantic memory (vector recall) behind the memory interface, if exploration shows exact-match dedupe is insufficient.
+- Multimodal vision checks (currently heuristic and off by default).
+- Postgres checkpoint backend alongside SQLite for multi-worker deployments.
+- A richer defects fixture corpus (SPA, maze/pagination) for the evaluation harness.
+- Authenticated-flow recipes (storage-state capture helpers).
+
+## FAQ
+
+**Does it need an API key?** No for development and CI: point `WA_LLM__BASE_URL` at a local model (Ollama, vLLM) and it runs at zero cost. A hosted provider key is only needed if you want to use one.
+
+**Will it click destructive buttons?** Not by default. Actions that look state-mutating or destructive are risk-classified and skipped under the safe-explore policy unless explicitly enabled (see [SECURITY.md](SECURITY.md)).
+
+**Can it test sites behind login?** Yes, via a Playwright storage-state file or HTTP credentials passed through the environment; credentials never pass through prompts or reports.
+
+**How does it avoid hallucinated clicks?** The model only ever references elements by ID from an inventory the browser actually extracted; the executor rejects any ID not present. See design decision D6 in the [architecture overview](docs/architecture/overview.md).
+
+## Known limitations
+
+- Accessible-name computation is a pragmatic subset of the full ARIA algorithm, sufficient for planning and QA but not spec-complete.
+- The QA engine's detectors are deterministic and rule-based; subtle visual or interaction bugs outside the detector set are not caught.
+- Single-worker by design today (SQLite state); horizontal scaling needs the Postgres backend on the roadmap.
+- Evaluation ground truth ships for the bundled fixtures; scoring your own site requires writing a ground-truth file.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). All checks (ruff, mypy strict, pytest with a 90 percent coverage gate) run in CI.
+
 ## License
 
-MIT (LICENSE file lands in Phase 17 packaging pass).
+[MIT](LICENSE).

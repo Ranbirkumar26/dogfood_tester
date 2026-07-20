@@ -1,0 +1,44 @@
+name: Bug report
+description: Report a defect in the agent or its tooling.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For anything security-related, use private vulnerability
+        reporting instead (see SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you observe, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: The command or request, the target site or fixture, and any relevant config.
+      placeholder: |
+        website-agent run https://example.com --max-steps 20
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: dropdown
+    id: provider
+    attributes:
+      label: LLM provider
+      options: [OpenAI, Ollama, Groq, OpenRouter, vLLM, Other, Not applicable]
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant log lines. Redact any secrets.
+      render: shell
