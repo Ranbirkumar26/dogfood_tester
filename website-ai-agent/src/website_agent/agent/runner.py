@@ -33,6 +33,8 @@ from website_agent.memory.service import MemoryService
 from website_agent.planner.planner import Planner
 from website_agent.prompts.manager import PromptManager
 from website_agent.qa.engine import QaEngine
+from website_agent.reporting.engine import ReportingEngine
+from website_agent.reporting.inputs import ReportInputs
 from website_agent.reviewer.reviewer import Reviewer
 from website_agent.state.agent_state import AgentState
 from website_agent.state.models import Budgets, GoalSpec, RunPolicy, RunResult
@@ -108,9 +110,25 @@ class AgentRunner:
 
             final_state = _as_graph_state(final)
             self._store.save(final_state.agent)
+            self._generate_reports(final_state, memory, store)
 
         assert final_state.run_result is not None  # finalize always sets it
         return final_state.run_result
+
+    def _generate_reports(
+        self, state: GraphState, memory: MemoryService, store: FileArtifactStore
+    ) -> None:
+        """Render and persist the human and machine reports for a finished run."""
+        if state.run_result is None or state.qa_report is None:
+            return
+        inputs = ReportInputs(
+            run_result=state.run_result,
+            page_graph=memory.graph,
+            qa_report=state.qa_report,
+            snapshots=state.visited_snapshots,
+            action_history=state.agent.action_history,
+        )
+        ReportingEngine(store).generate(inputs)
 
     def list_runs(self) -> list[dict[str, object]]:
         """Run-registry rows (newest first) for the CLI and API."""
