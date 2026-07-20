@@ -63,3 +63,36 @@ def _route_after_planner(state: GraphState) -> str:
     if state.plan is None or state.plan.is_empty:
         return "finalize"
     return "executor"
+
+
+def render_graph_mermaid() -> str:
+    """Mermaid of the graph topology, built without dependencies (for the CLI `graph` command).
+
+    Uses stub node callables so the structure can be drawn without a browser or model; the
+    edges and routing match the real graph exactly.
+    """
+
+    def _stub(state: GraphState) -> dict[str, object]:  # pragma: no cover - never executed
+        return {}
+
+    graph: StateGraph[GraphState] = StateGraph(GraphState)
+    for name in ("bootstrap", "planner", "executor", "reviewer", "decide", "finalize"):
+        graph.add_node(name, _stub)
+    graph.add_edge(START, "bootstrap")
+    graph.add_edge("bootstrap", "planner")
+    graph.add_conditional_edges(
+        "planner", _route_after_planner, {"executor": "executor", "finalize": "finalize"}
+    )
+    graph.add_edge("executor", "reviewer")
+    graph.add_edge("reviewer", "decide")
+    graph.add_conditional_edges(
+        "decide",
+        route_after_decide,
+        {
+            Edge.PLANNER.value: "planner",
+            Edge.EXECUTOR.value: "executor",
+            Edge.FINALIZE.value: "finalize",
+        },
+    )
+    graph.add_edge("finalize", END)
+    return graph.compile().get_graph().draw_mermaid()

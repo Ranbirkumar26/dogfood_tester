@@ -27,6 +27,7 @@ classifiers = [
 #   playwright        - the browser engine behind BrowserSession (Phase 3, design D5)
 #   openai            - OpenAI-compatible wire protocol for every provider (Phase 4, design D3)
 #   langgraph         - durable stateful orchestration of the plan-execute-review loop (Phase 9, D1)
+#   typer             - the CLI command surface (Phase 13); pulls click, uses the existing rich
 dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
@@ -34,7 +35,11 @@ dependencies = [
     "playwright>=1.45",
     "openai>=1.40",
     "langgraph>=0.2",
+    "typer>=0.12",
 ]
+
+[project.scripts]
+website-agent = "website_agent.cli.main:app"
 
 [project.optional-dependencies]
 dev = [

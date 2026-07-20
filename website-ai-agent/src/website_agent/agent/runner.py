@@ -24,20 +24,22 @@ from website_agent.core.artifacts import FileArtifactStore
 from website_agent.core.clock import Clock, SystemClock
 from website_agent.core.ids import generate_run_id
 from website_agent.executor.executor import Executor
-from website_agent.llm.ledger import TokenLedger
+from website_agent.llm.ledger import LedgerTotals, TokenLedger
 from website_agent.llm.manager import ModelManager
 from website_agent.llm.pricing import PriceTable
 from website_agent.llm.rate_limit import AsyncRateLimiter
 from website_agent.logging import bind_run_context, get_logger
+from website_agent.memory.graph import PageGraph
 from website_agent.memory.service import MemoryService
 from website_agent.planner.planner import Planner
 from website_agent.prompts.manager import PromptManager
 from website_agent.qa.engine import QaEngine
+from website_agent.qa.models import QaReport
 from website_agent.reporting.engine import ReportingEngine
 from website_agent.reporting.inputs import ReportInputs
 from website_agent.reviewer.reviewer import Reviewer
 from website_agent.state.agent_state import AgentState
-from website_agent.state.models import Budgets, GoalSpec, RunPolicy, RunResult
+from website_agent.state.models import ActionRecord, Budgets, GoalSpec, RunPolicy, RunResult
 from website_agent.state.store import CheckpointStore
 
 log = get_logger("agent.runner")
@@ -52,6 +54,21 @@ class RunSpec:
     budgets: Budgets | None = None  # None uses settings.budgets
     max_attempts: int = 2
     loop_limit: int = 5
+
+
+@dataclass
+class RunArtifacts:
+    """The full raw output of a run, for consumers (like the eval harness) that need more
+    than RunResult. Kept as plain package types so dev tooling can reduce it without the
+    package importing dev-only code."""
+
+    run_result: RunResult
+    qa_report: QaReport
+    page_graph: PageGraph
+    action_history: tuple[ActionRecord, ...]
+    ledger_totals: LedgerTotals
+    screenshots: int
+    wall_seconds: float
 
 
 class AgentRunner:
@@ -73,11 +90,16 @@ class AgentRunner:
 
     async def run(self, spec: RunSpec) -> RunResult:
         """Execute a fresh run end to end and return its result."""
+        return (await self.run_collecting(spec)).run_result
+
+    async def run_collecting(self, spec: RunSpec) -> RunArtifacts:
+        """Execute a run and return the full artifact bundle (for evaluation and tooling)."""
         run_id = generate_run_id(self._clock)
         budgets = spec.budgets or _budgets_from_settings(self._settings)
         store = FileArtifactStore(self._settings.paths.reports_dir, run_id, self._clock)
         ledger = TokenLedger(PriceTable(), self._clock)
         model = self._injected_model or _build_model(self._settings, ledger, self._clock)
+        started = self._clock.monotonic()
 
         initial = GraphState(
             agent=AgentState(run_id=run_id, goal=spec.goal, policy=spec.policy, budgets=budgets)
@@ -111,9 +133,19 @@ class AgentRunner:
             final_state = _as_graph_state(final)
             self._store.save(final_state.agent)
             self._generate_reports(final_state, memory, store)
+            screenshots = session.screenshots.count
 
         assert final_state.run_result is not None  # finalize always sets it
-        return final_state.run_result
+        assert final_state.qa_report is not None
+        return RunArtifacts(
+            run_result=final_state.run_result,
+            qa_report=final_state.qa_report,
+            page_graph=memory.graph,
+            action_history=final_state.agent.action_history,
+            ledger_totals=ledger.totals(),
+            screenshots=screenshots,
+            wall_seconds=self._clock.monotonic() - started,
+        )
 
     def _generate_reports(
         self, state: GraphState, memory: MemoryService, store: FileArtifactStore
