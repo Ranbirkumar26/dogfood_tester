@@ -15,7 +15,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 3 | Browser tooling | Done |
 | 4 | LLM tooling | Done |
 | 5 | State management | Done |
-| 6 | Planner | Pending |
+| 6 | Planner | Done |
 | 7 | Executor | Pending |
 | 8 | Reviewer | Pending |
 | 9 | LangGraph orchestration | Pending |
