@@ -33,7 +33,7 @@ Pre-release, feature-complete through the core build. All layers implemented and
 | 15 | Docker | Done |
 | 16 | CI/CD | Done |
 | 17 | Open source preparation | Done |
-| 18 | Final audit | Pending |
+| 18 | Final audit | Done |
 
 ## Design
 
