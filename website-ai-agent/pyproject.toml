@@ -28,6 +28,8 @@ classifiers = [
 #   openai            - OpenAI-compatible wire protocol for every provider (Phase 4, design D3)
 #   langgraph         - durable stateful orchestration of the plan-execute-review loop (Phase 9, D1)
 #   typer             - the CLI command surface (Phase 13); pulls click, uses the existing rich
+#   fastapi           - the REST server (Phase 14); pulls starlette, reuses pydantic
+#   uvicorn           - ASGI server to run the FastAPI app (Phase 14)
 dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
@@ -36,6 +38,8 @@ dependencies = [
     "openai>=1.40",
     "langgraph>=0.2",
     "typer>=0.12",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
 ]
 
 [project.scripts]
