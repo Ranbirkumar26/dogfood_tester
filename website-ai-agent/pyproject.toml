@@ -26,12 +26,14 @@ classifiers = [
 #   rich              - human log sink and CLI rendering (Phase 2, reused Phase 13)
 #   playwright        - the browser engine behind BrowserSession (Phase 3, design D5)
 #   openai            - OpenAI-compatible wire protocol for every provider (Phase 4, design D3)
+#   langgraph         - durable stateful orchestration of the plan-execute-review loop (Phase 9, D1)
 dependencies = [
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "rich>=13.7",
     "playwright>=1.45",
     "openai>=1.40",
+    "langgraph>=0.2",
 ]
 
 [project.optional-dependencies]
