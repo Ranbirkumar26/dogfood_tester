@@ -1,0 +1,72 @@
+name: CI
+
+# The project lives in the website-ai-agent/ subdirectory of this repository, but GitHub
+# Actions only discovers workflows at the repository root, so this workflow runs the same
+# checks with the subdirectory as the working directory. Everything runs keyless and offline:
+# tests use scripted models and a local fixture server (design D9, D13).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: website-ai-agent
+
+jobs:
+  lint-type:
+    name: Lint and type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy
+
+  test:
+    name: Tests (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - name: Install Chromium
+        run: python -m playwright install --with-deps chromium
+      - name: Test with coverage
+        run: pytest --cov --cov-report=xml --cov-report=term --cov-fail-under=90
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: website-ai-agent/coverage.xml
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: website-ai-agent
+          push: false
+          tags: website-ai-agent:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
