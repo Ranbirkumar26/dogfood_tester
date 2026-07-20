@@ -17,7 +17,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 5 | State management | Done |
 | 6 | Planner | Done |
 | 7 | Executor | Done |
-| 8 | Reviewer | Pending |
+| 8 | Reviewer | Done |
 | 9 | LangGraph orchestration | Pending |
 | 10 | QA engine | Pending |
 | 11 | Documentation engine | Pending |
