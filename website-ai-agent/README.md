@@ -14,7 +14,7 @@ Pre-release. Architecture phase complete; implementation in progress.
 | 2 | Foundation (config, logging, errors, DI) | Done |
 | 3 | Browser tooling | Done |
 | 4 | LLM tooling | Done |
-| 5 | State management | Pending |
+| 5 | State management | Done |
 | 6 | Planner | Pending |
 | 7 | Executor | Pending |
 | 8 | Reviewer | Pending |

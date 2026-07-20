@@ -6,7 +6,7 @@ Read `docs/architecture/overview.md` first. Decisions D1..D14 there are binding;
 
 18-phase spec from the project owner, strict order, approval gate after every phase. Each phase ends with the audit block: deliverables, files, remaining work, manual test checklist, automated test results, architecture validation, production readiness score. Never start phase N+1 without explicit approval of phase N.
 
-Phase status: 1-4 done (architecture; foundation; browser tooling; LLM tooling: ModelManager over openai SDK with structured outputs/repair, token+cost ledger, sliding-window rate limiter, record/replay cassettes, PromptManager). 188 tests, 96 percent coverage, ruff plus mypy strict clean. Committing and pushing to GitHub after each phase (standing order). Next: Phase 5 (state management).
+Phase status: 1-5 done (architecture; foundation; browser; LLM; state+memory: AgentState with budgets/counters/loop signal, SQLite CheckpointStore with resume and schema-version guard, PageGraph with template collapse, ActionRegistry dedupe, MemoryService). 221 tests, 96 percent coverage, ruff plus mypy strict clean. Committing and pushing to GitHub after each phase (standing order). Next: Phase 6 (planner).
 
 Dev commands: `.venv/bin/python -m pytest --cov`, `.venv/bin/ruff check .`, `.venv/bin/ruff format .`, `.venv/bin/mypy`. Python 3.13 venv at `.venv/`.
 
