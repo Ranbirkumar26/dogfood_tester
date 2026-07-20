@@ -16,8 +16,8 @@ All figures below were produced by running the checks, not estimated.
 | Source size | ~6,950 LOC across 18 module packages |
 | Test size | ~6,400 LOC (roughly 1:1 test-to-source) |
 | Docs | 26 Markdown documents (9 architecture, 12 module, guides, audit) |
-| CI | GitHub Actions: lint/type, test matrix 3.11 to 3.13, Docker build; triggered and running |
-| Packaging | Wheel builds and includes prompt templates and py.typed; Docker compose config valid |
+| CI | GitHub Actions green: lint/type, tests on 3.11/3.12/3.13, and Docker build all pass |
+| Packaging | Wheel builds and includes prompt templates and py.typed; Docker image builds on CI |
 
 ## Dimension review
 
@@ -67,8 +67,9 @@ Runs headless in Docker as non-root with a persistent volume, config entirely th
 2. Full crash-resume is designed and unit-tested at the store level but lacks an end-to-end integration test.
 3. Single-worker only; no Postgres backend yet.
 4. Accessible-name computation is a pragmatic ARIA subset.
-5. The full Docker image build was validated structurally (compose config, wheel packaging) but not executed in the build environment.
-6. Vision checks are heuristic and off by default; no multimodal QA yet.
+5. Vision checks are heuristic and off by default; no multimodal QA yet.
+
+The Docker image build, initially only validated structurally, is now built and verified green on CI, so that earlier caveat is resolved.
 
 ## Verdict
 
