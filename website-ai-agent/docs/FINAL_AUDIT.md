@@ -8,13 +8,13 @@ All figures below were produced by running the checks, not estimated.
 
 | Check | Result |
 |---|---|
-| Tests | 385 passing (48 test files; 5 real-browser integration files) |
+| Tests | 391 passing (49 test files; 6 real-browser integration files) |
 | Coverage | 97 percent (branch coverage on), gated at 90 percent in CI |
 | Lint | `ruff check` clean |
 | Format | `ruff format --check` clean |
 | Types | `mypy --strict` clean across 87 source files (src and evaluation) |
-| Source size | ~6,950 LOC across 18 module packages |
-| Test size | ~6,400 LOC (roughly 1:1 test-to-source) |
+| Source size | ~7,050 LOC across 18 module packages |
+| Test size | ~6,600 LOC (roughly 1:1 test-to-source) |
 | Docs | 26 Markdown documents (9 architecture, 12 module, guides, audit) |
 | CI | GitHub Actions green: lint/type, tests on 3.11/3.12/3.13, and Docker build all pass |
 | Packaging | Wheel builds and includes prompt templates and py.typed; Docker image builds on CI |
@@ -23,7 +23,7 @@ All figures below were produced by running the checks, not estimated.
 
 ### Architecture (9/10)
 
-Five layers with a strictly enforced downward dependency rule, 14 numbered and justified design decisions, and a clean separation between deterministic capabilities and the three LLM roles. The plan-execute-review loop is a real LangGraph state machine, not a hand-rolled loop, so checkpointing, resume, and visualization come from the framework. The single strongest decision is D6 (element-ID addressing): the model can only act on elements the browser actually extracted, which structurally eliminates the most common class of browser-agent failure. Point off: the memory layer is deliberately not pluggable to a vector store yet, and the resume path, while designed and scaffolded in state, is exercised at the store level but not yet through a full crash-resume integration test.
+Five layers with a strictly enforced downward dependency rule, 14 numbered and justified design decisions, and a clean separation between deterministic capabilities and the three LLM roles. The plan-execute-review loop is a real LangGraph state machine, not a hand-rolled loop, so checkpointing, resume, and visualization come from the framework. The single strongest decision is D6 (element-ID addressing): the model can only act on elements the browser actually extracted, which structurally eliminates the most common class of browser-agent failure. Crash-resume is implemented end to end (persistent SQLite checkpoints plus a rehydrating `resume`). Point off: the memory layer is deliberately not pluggable to a vector store yet.
 
 ### Maintainability (9/10)
 
@@ -51,7 +51,7 @@ Nine architecture documents (with Mermaid diagrams), a module doc per package, D
 
 ### Testing (9/10)
 
-385 tests at 97 percent coverage, with a genuine unit/integration split: unit tests fake the seams and run in milliseconds; integration tests drive real headless Chromium against a local fixture server and exercise the whole graph end to end. Nothing touches the public internet, and the whole suite runs keyless via scripted models. The honest gap: role-level LLM behavior is tested against scripted outputs, not committed replay cassettes of a real model, so prompt-quality regressions against a live model are not caught in CI (the cassette infrastructure exists; recordings are not yet committed).
+391 tests at 97 percent coverage, with a genuine unit/integration split: unit tests fake the seams and run in milliseconds; integration tests drive real headless Chromium against a local fixture server and exercise the whole graph end to end, including a crash-resume test that kills a run mid-flight and continues it from its checkpoint. Nothing touches the public internet, and the whole suite runs keyless via scripted models. The honest gap: role-level LLM behavior is tested against scripted outputs, not committed replay cassettes of a real model, so prompt-quality regressions against a live model are not caught in CI (the cassette infrastructure exists; recordings are not yet committed).
 
 ### Open-source and GitHub quality (9/10)
 
@@ -59,7 +59,7 @@ MIT license, CONTRIBUTING, SECURITY, CHANGELOG, issue and PR templates, README w
 
 ### Production readiness (8.5/10)
 
-Runs headless in Docker as non-root with a persistent volume, config entirely through environment, budgets and safety fences on by default, structured JSON logs, and cost transparency. What a team would still want before betting on it: committed live-model eval baselines, a crash-resume integration test, and a load benchmark. None are blockers for the intended use (QA of your own sites and staging).
+Runs headless in Docker as non-root with a persistent volume, config entirely through environment, budgets and safety fences on by default, structured JSON logs, cost transparency, and crash-resume from durable checkpoints. What a team would still want before betting on it: committed live-model eval baselines and a load benchmark. Neither is a blocker for the intended use (QA of your own sites and staging).
 
 ## Honest gap list
 
