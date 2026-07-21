@@ -37,6 +37,8 @@ dependencies = [
     "playwright>=1.45",
     "openai>=1.40",
     "langgraph>=0.2",
+    # Persistent graph checkpoints for crash-resume (design D8); the SqliteSaver backend.
+    "langgraph-checkpoint-sqlite>=2.0",
     "typer>=0.12",
     "fastapi>=0.110",
     "uvicorn>=0.29",

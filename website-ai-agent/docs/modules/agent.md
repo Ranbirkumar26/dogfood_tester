@@ -30,7 +30,11 @@ Routing enforces budgets and stop conditions, so it is a pure function, LLM-free
 
 ## State, dependencies, and durability
 
-`GraphState` (Layer 4) may hold the Layer 3 role outputs `AgentState` cannot import. Non-serializable handles (browser session, live memory service, role objects) live in `GraphDeps`, injected into the nodes and never checkpointed, so checkpoints stay clean. LangGraph checkpoints `GraphState` per node; the `AgentRunner` also persists the final `AgentState` to the SQLite `CheckpointStore` and records the run in the registry. The LangGraph recursion limit is set above the step budget, so budgets, not the framework, stop a run.
+`GraphState` (Layer 4) may hold the Layer 3 role outputs `AgentState` cannot import. Non-serializable handles (browser session, live memory service, role objects) live in `GraphDeps`, injected into the nodes and never checkpointed, so checkpoints stay clean. LangGraph checkpoints `GraphState` to a persistent SQLite backend (`AsyncSqliteSaver`) per super-step; the `AgentRunner` also persists the final `AgentState` to its own `CheckpointStore` run registry. The LangGraph recursion limit is set above the step budget, so budgets, not the framework, stop a run.
+
+## Resume (design D8)
+
+`AgentRunner.resume(run_id)` continues a crashed or interrupted run from its last persisted graph checkpoint. It rebuilds the browser session (restoring storage state if the run saved it), navigates to the checkpointed page and re-extracts it, rebuilds the live memory service from the checkpointed memory, seeds the token ledger with prior spend so budgets stay continuous, forces a replan when the page has drifted, then invokes the graph with no new input so LangGraph resumes from where it stopped. Exercised end to end by a crash-resume integration test (a model that raises mid-run, then a fresh runner that resumes to completion).
 
 ## Visualization
 

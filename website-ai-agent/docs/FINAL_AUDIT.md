@@ -64,12 +64,11 @@ Runs headless in Docker as non-root with a persistent volume, config entirely th
 ## Honest gap list
 
 1. Role LLM cassettes are not committed, so live-model prompt regressions are not gated (infrastructure exists).
-2. Full crash-resume is designed and unit-tested at the store level but lacks an end-to-end integration test.
-3. Single-worker only; no Postgres backend yet.
-4. Accessible-name computation is a pragmatic ARIA subset.
-5. Vision checks are heuristic and off by default; no multimodal QA yet.
+2. Single-worker only; no Postgres backend yet.
+3. Accessible-name computation is a pragmatic ARIA subset.
+4. Vision checks are heuristic and off by default; no multimodal QA yet.
 
-The Docker image build, initially only validated structurally, is now built and verified green on CI, so that earlier caveat is resolved.
+Two gaps from the initial audit are now closed: the Docker image build is verified green on CI, and full crash-resume is implemented (persistent LangGraph SQLite checkpoints plus `AgentRunner.resume`) and covered by an end-to-end integration test that crashes a run and resumes it to completion.
 
 ## Verdict
 

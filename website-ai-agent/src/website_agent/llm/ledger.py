@@ -68,6 +68,22 @@ class TokenLedger:
         self._entries.append(entry)
         return entry
 
+    def seed(self, *, tokens: int, cost_usd: float) -> None:
+        """Inject a base of prior spend (used when resuming a run) so budget accounting is
+        continuous across a crash. The synthetic entry preserves totals without re-pricing."""
+        if tokens <= 0 and cost_usd <= 0:
+            return
+        self._entries.append(
+            LlmUsage(
+                role="resume_base",
+                model="(resumed)",
+                prompt_tokens=tokens,
+                completion_tokens=0,
+                cost_usd=cost_usd,
+                at=self._clock.now(),
+            )
+        )
+
     def entries(self) -> list[LlmUsage]:
         """All entries in call order (copy; the ledger stays append-only)."""
         return list(self._entries)

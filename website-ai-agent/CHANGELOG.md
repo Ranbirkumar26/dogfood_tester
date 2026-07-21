@@ -26,6 +26,9 @@ All notable changes to this project are documented here. The format follows
 - QA engine: a deterministic detector pipeline producing severity-ranked findings.
 - Reporting: QA reports, generated site documentation, user-flow graphs, and JSON/CSV exports.
 - Evaluation harness: ground-truth matching and metric collectors with report writers.
+- Crash-resume: persistent LangGraph SQLite checkpoints and `AgentRunner.resume` (with a
+  `website-agent resume` command) continue a crashed run from its last checkpoint, rehydrating
+  the browser, memory, and budget accounting.
 - Interfaces: a Typer CLI and a FastAPI server.
 - Packaging and CI: Docker image and compose, GitHub Actions for lint, type, tests, coverage,
   Docker build, and tag-driven publishing.

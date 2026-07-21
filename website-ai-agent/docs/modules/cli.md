@@ -8,6 +8,7 @@ Layer 5 interface: the Typer command surface. A thin adapter over `AgentRunner` 
 |---|---|
 | `website-agent run <url>` | Explore a site (explore mode); prints a run summary and writes reports |
 | `website-agent test <url>` | Explore in test mode: exercise forms, probe validation |
+| `website-agent resume <run_id>` | Resume a crashed or interrupted run from its last checkpoint |
 | `website-agent docs <url>` | Explore in document mode: breadth-first for documentation |
 | `website-agent report <run_id>` | Print a run's QA report Markdown from its output directory |
 | `website-agent summary <run_id>` | Print a run's findings counts from report.json |

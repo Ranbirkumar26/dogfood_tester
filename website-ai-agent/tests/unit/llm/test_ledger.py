@@ -56,3 +56,19 @@ def test_empty_ledger_totals_are_zero(fixed_clock: FixedClock) -> None:
     assert totals.calls == 0
     assert totals.cost_usd == 0.0
     assert totals.total_tokens == 0
+
+
+def test_seed_carries_prior_spend_across_resume(fixed_clock: FixedClock) -> None:
+    ledger = _ledger(fixed_clock)
+    ledger.seed(tokens=500, cost_usd=0.02)
+    ledger.record(role="planner", model="m", prompt_tokens=100, completion_tokens=50)
+    totals = ledger.totals()
+    # The seed preserves prior tokens and cost; the new call adds its own on top.
+    assert totals.total_tokens == 650
+    assert totals.cost_usd == 0.0202  # 0.02 seeded + 0.0002 for the 100/50 token call
+
+
+def test_seed_is_a_noop_for_zero_spend(fixed_clock: FixedClock) -> None:
+    ledger = _ledger(fixed_clock)
+    ledger.seed(tokens=0, cost_usd=0.0)
+    assert ledger.totals().calls == 0

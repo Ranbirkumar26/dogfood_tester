@@ -114,6 +114,23 @@ def run_test(
 
 
 @app.command()
+def resume(
+    run_id: Annotated[str, typer.Argument(help="Run id to resume from its last checkpoint.")],
+    config: _ConfigOpt = None,
+) -> None:
+    """Resume a crashed or interrupted run from its last checkpoint."""
+    settings = load_settings(config_file=config)
+    configure_logging(settings.logging)
+    runner = AgentRunner(settings)
+    try:
+        with console.status(f"Resuming {run_id} ..."):
+            result = asyncio.run(runner.resume(run_id))
+    finally:
+        runner.close()
+    _render_result(result)
+
+
+@app.command()
 def docs(
     url: _UrlArg,
     config: _ConfigOpt = None,
