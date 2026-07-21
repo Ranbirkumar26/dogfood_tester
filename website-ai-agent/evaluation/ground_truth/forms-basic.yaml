@@ -1,0 +1,15 @@
+# Ground truth for tests/fixtures/sites/forms-basic.
+site: forms-basic
+expected_reachable_pages: 1
+expected_interactive_elements: 5
+defects:
+  - id: FORMS-001
+    kind: missing_validation
+    location: "/index.html"
+    severity: major
+    notes: "signup form accepts malformed email without showing validation feedback"
+  - id: FORMS-002
+    kind: missing_label
+    location: "/index.html"
+    severity: major
+    notes: "profile display-name input has no accessible name"

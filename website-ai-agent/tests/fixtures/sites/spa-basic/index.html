@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>SPA Basic Fixture</title>
+</head>
+<body>
+  <main>
+    <h1 id="view-title">Dashboard</h1>
+    <button type="button" data-testid="open-modal" onclick="openModal()">Open modal</button>
+    <button type="button" data-testid="next-page" onclick="nextPage()">Next page</button>
+    <section id="list" aria-live="polite">Page 1</section>
+    <div id="modal-root"></div>
+  </main>
+  <script>
+    let page = 1;
+    function nextPage() {
+      page += 1;
+      history.pushState({}, '', '#page-' + page);
+      document.getElementById('list').textContent = 'Page ' + page;
+    }
+    function openModal() {
+      document.getElementById('modal-root').innerHTML =
+        '<div role="dialog" aria-label="Settings"><button type="button" onclick="closeModal()">Close</button></div>';
+    }
+    function closeModal() {
+      document.getElementById('modal-root').innerHTML = '';
+    }
+  </script>
+</body>
+</html>

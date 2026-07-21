@@ -135,6 +135,9 @@ def _title_for(kind: str) -> str:
         "console_error": "JavaScript console error",
         "http_error": "Failed network request",
         "dead_action": "Interaction with no observable effect",
+        "unexpected_redirect": "Unexpected redirect",
+        "missing_validation": "Missing form validation",
+        "slow_request": "Slow network request",
     }.get(kind, kind.replace("_", " ").title())
 
 

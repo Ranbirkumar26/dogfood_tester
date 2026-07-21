@@ -8,14 +8,14 @@ All figures below were produced by running the checks, not estimated.
 
 | Check | Result |
 |---|---|
-| Tests | 391 passing (49 test files; 6 real-browser integration files) |
-| Coverage | 97 percent (branch coverage on), gated at 90 percent in CI |
+| Tests | 399 passing (49 test files; 6 real-browser integration files) |
+| Coverage | 97.31 percent (branch coverage on), gated at 90 percent in CI |
 | Lint | `ruff check` clean |
 | Format | `ruff format --check` clean |
 | Types | `mypy --strict` clean across 87 source files (src and evaluation) |
-| Source size | ~7,050 LOC across 18 module packages |
-| Test size | ~6,600 LOC (roughly 1:1 test-to-source) |
-| Docs | 26 Markdown documents (9 architecture, 12 module, guides, audit) |
+| Source size | ~7,180 LOC across 18 module packages |
+| Test size | ~6,220 Python LOC plus 13 committed fixture-site files |
+| Docs | 27 Markdown documents (9 architecture, 16 module, guide, audit) |
 | CI | GitHub Actions green: lint/type, tests on 3.11/3.12/3.13, and Docker build all pass |
 | Packaging | Wheel builds and includes prompt templates and py.typed; Docker image builds on CI |
 
@@ -43,7 +43,7 @@ A single failure taxonomy (F1 to F8) mapped to typed exceptions, with retry poli
 
 ### Performance (8/10)
 
-The design is deliberately token-frugal: successful steps skip the planner (roughly halving LLM calls), the reviewer settles mechanical expectations without a model call, candidate shortlists are pre-filtered before scoring, and snapshots are salience-truncated for prompts. Cost is accounted per call and visible in every report. Not yet measured under load; the eval harness collects latency but no large-site benchmark is committed.
+The design is deliberately token-frugal: successful steps skip the planner (roughly halving LLM calls), the reviewer settles mechanical expectations without a model call, candidate shortlists are pre-filtered before scoring, and snapshots are salience-truncated for prompts. Cost is accounted per call and visible in every report. Slow network requests are now captured as QA evidence when timing data is available. Not yet measured under load; the eval harness collects latency but no large-site benchmark is committed.
 
 ### Documentation (9/10)
 
@@ -51,7 +51,7 @@ Nine architecture documents (with Mermaid diagrams), a module doc per package, D
 
 ### Testing (9/10)
 
-391 tests at 97 percent coverage, with a genuine unit/integration split: unit tests fake the seams and run in milliseconds; integration tests drive real headless Chromium against a local fixture server and exercise the whole graph end to end, including a crash-resume test that kills a run mid-flight and continues it from its checkpoint. Nothing touches the public internet, and the whole suite runs keyless via scripted models. The honest gap: role-level LLM behavior is tested against scripted outputs, not committed replay cassettes of a real model, so prompt-quality regressions against a live model are not caught in CI (the cassette infrastructure exists; recordings are not yet committed).
+399 tests at 97.31 percent coverage, with a genuine unit/integration split: unit tests fake the seams and run in milliseconds; integration tests drive real headless Chromium against a local fixture server and exercise the whole graph end to end, including a crash-resume test that kills a run mid-flight and continues it from its checkpoint. Nothing touches the public internet, and the whole suite runs keyless via scripted models. The evaluation corpus now includes static, forms, defects, SPA, and maze fixtures with matching scenario and ground-truth YAML. The honest gap: role-level LLM behavior is tested against scripted outputs, not committed replay cassettes of a real model, so prompt-quality regressions against a live model are not caught in CI (the cassette infrastructure exists; recordings are not yet committed).
 
 ### Open-source and GitHub quality (9/10)
 
@@ -68,7 +68,7 @@ Runs headless in Docker as non-root with a persistent volume, config entirely th
 3. Accessible-name computation is a pragmatic ARIA subset.
 4. Vision checks are heuristic and off by default; no multimodal QA yet.
 
-Two gaps from the initial audit are now closed: the Docker image build is verified green on CI, and full crash-resume is implemented (persistent LangGraph SQLite checkpoints plus `AgentRunner.resume`) and covered by an end-to-end integration test that crashes a run and resumes it to completion.
+Additional gaps from earlier audits are now closed: placeholder repository URLs were replaced with the real GitHub repository, unexpected redirects, missing validation, and slow requests produce structured QA findings, the local editable install was refreshed so plain pytest works, the architecture overview status reflects the implemented state, Docker image build is verified green on CI, and full crash-resume is implemented (persistent LangGraph SQLite checkpoints plus `AgentRunner.resume`) and covered by an end-to-end integration test that crashes a run and resumes it to completion.
 
 ## Verdict
 

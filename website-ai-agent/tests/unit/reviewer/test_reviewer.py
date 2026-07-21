@@ -179,6 +179,20 @@ async def test_semantic_expectation_uses_llm() -> None:
     assert "validation error is visible" in verdict.reasons
 
 
+async def test_unmet_validation_expectation_becomes_qa_candidate() -> None:
+    model = ScriptedModel(
+        ReviewerJudgement(
+            expectation_met=False,
+            decision=ReviewDecision.REPLAN,
+            reasoning="invalid input was accepted",
+        )
+    )
+    verdict = await _reviewer(model).review(
+        _step(ExpectationKind.VALIDATION_ERROR, "email field shows an error"), _result()
+    )
+    assert any(c.kind == "missing_validation" for c in verdict.qa_candidates)
+
+
 async def test_semantic_judgement_renders_observations_into_prompt() -> None:
     # Populated console and network observations exercise the prompt render helpers.
     model = ScriptedModel(

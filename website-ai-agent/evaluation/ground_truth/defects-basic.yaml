@@ -1,0 +1,25 @@
+# Ground truth for tests/fixtures/sites/defects-basic.
+site: defects-basic
+expected_reachable_pages: 3
+expected_interactive_elements: 7
+defects:
+  - id: DEFECTS-001
+    kind: console_error
+    location: "/index.html"
+    severity: major
+    notes: "index.html logs defects-basic-console-marker"
+  - id: DEFECTS-002
+    kind: http_error
+    location: "/server-error.json"
+    severity: major
+    notes: "index.html fetches a missing JSON endpoint"
+  - id: DEFECTS-003
+    kind: duplicate_id
+    location: "/index.html"
+    severity: minor
+    notes: "two buttons share id='duplicate'"
+  - id: DEFECTS-004
+    kind: unexpected_redirect
+    location: "/login.html"
+    severity: major
+    notes: "redirect-start.html immediately sends the browser to login.html"

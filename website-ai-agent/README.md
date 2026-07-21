@@ -1,6 +1,6 @@
 # Website AI Agent
 
-![CI](https://github.com/placeholder/website-ai-agent/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Ranbirkumar26/dogfood_tester/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 ![Coverage](https://img.shields.io/badge/coverage-~97%25-brightgreen)
@@ -65,7 +65,7 @@ Domain-allowlisted navigation, a destructive-action policy (safe-explore by defa
 - Semantic memory (vector recall) behind the memory interface, if exploration shows exact-match dedupe is insufficient.
 - Multimodal vision checks (currently heuristic and off by default).
 - Postgres checkpoint backend alongside SQLite for multi-worker deployments.
-- A richer defects fixture corpus (SPA, maze/pagination) for the evaluation harness.
+- Larger load benchmarks and authenticated-flow fixtures for the evaluation harness.
 - Authenticated-flow recipes (storage-state capture helpers).
 
 ## FAQ

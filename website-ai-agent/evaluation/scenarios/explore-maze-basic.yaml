@@ -1,0 +1,11 @@
+# Explore a cyclic navigation graph with one intentional dead end.
+name: explore-maze-basic
+site: maze-basic
+mode: explore
+max_steps: 35
+max_usd: 0.0
+max_wall_seconds: 240
+success:
+  min_page_coverage: 0.75
+  min_bug_recall: 0.5
+  min_bug_precision: 0.5

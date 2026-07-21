@@ -54,6 +54,23 @@ def test_candidate_promotion_dedupes_across_run() -> None:
     assert findings[0].title == "JavaScript console error"
 
 
+def test_candidate_promotion_titles_new_finding_types() -> None:
+    ctx = QaContext(
+        run_id="r",
+        candidates=(
+            _candidate("unexpected_redirect", "https://ex.com/a", "ended at login"),
+            _candidate("missing_validation", "https://ex.com/form", "invalid email accepted"),
+            _candidate("slow_request", "https://ex.com/app", "GET /api took 3000ms"),
+        ),
+    )
+    titles = {finding.kind: finding.title for finding in detect_from_candidates(ctx)}
+    assert titles == {
+        "unexpected_redirect": "Unexpected redirect",
+        "missing_validation": "Missing form validation",
+        "slow_request": "Slow network request",
+    }
+
+
 def test_missing_label_detected_for_unnamed_control() -> None:
     ctx = QaContext(
         run_id="r",

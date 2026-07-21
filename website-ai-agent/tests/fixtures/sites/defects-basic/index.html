@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Defects Basic Fixture</title>
+</head>
+<body>
+  <nav aria-label="Defect navigation">
+    <a href="/missing.html">Broken page</a>
+    <a href="/redirect-start.html">Unexpected redirect</a>
+  </nav>
+  <main>
+    <h1>Defects Basic Fixture</h1>
+    <button id="duplicate">First duplicate id</button>
+    <button id="duplicate">Second duplicate id</button>
+    <button type="button" onclick="fetch('/slow-api.json')">Slow API</button>
+  </main>
+  <script>
+    console.error('defects-basic-console-marker');
+    fetch('/server-error.json').catch(() => {});
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+# Exercise seeded functional, network, accessibility, and markup defects.
+name: explore-defects-basic
+site: defects-basic
+mode: explore
+max_steps: 40
+max_usd: 0.0
+max_wall_seconds: 300
+success:
+  min_page_coverage: 0.6
+  min_bug_recall: 0.4
+  min_bug_precision: 0.5

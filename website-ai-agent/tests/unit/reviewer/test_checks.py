@@ -19,7 +19,12 @@ from website_agent.planner.models import (
     ExpectationKind,
     PlanStep,
 )
-from website_agent.reviewer.checks import check_mechanical, extract_qa_candidates, is_mechanical
+from website_agent.reviewer.checks import (
+    check_mechanical,
+    extract_qa_candidates,
+    is_mechanical,
+    validation_candidate,
+)
 
 NOW = datetime(2026, 7, 20, tzinfo=UTC)
 
@@ -54,7 +59,7 @@ def _result(
     )
 
 
-def _step(kind: ExpectationKind) -> PlanStep:
+def _step(kind: ExpectationKind, *, target_url: str | None = None) -> PlanStep:
     return PlanStep(
         step_id="step_0001",
         action=ActionType.CLICK,
@@ -63,6 +68,7 @@ def _step(kind: ExpectationKind) -> PlanStep:
         label="click",
         risk=RiskClass.SAFE,
         expectation=Expectation(kind=kind),
+        target_url=target_url,
     )
 
 
@@ -125,6 +131,65 @@ def test_http_errors_severity_by_status() -> None:
     http = {c.detail.split()[1]: c for c in extract_qa_candidates(result) if c.kind == "http_error"}
     assert http["/missing"].severity is Severity.MAJOR
     assert http["/api"].severity is Severity.CRITICAL
+
+
+def test_slow_requests_become_candidates() -> None:
+    result = _result(
+        network=[
+            NetworkEvent(
+                method="GET",
+                url="/slow",
+                status=200,
+                ok=True,
+                duration_ms=2_750.0,
+                at=NOW,
+            ),
+        ]
+    )
+    slow = [c for c in extract_qa_candidates(result) if c.kind == "slow_request"]
+    assert len(slow) == 1
+    assert slow[0].severity is Severity.MINOR
+    assert "2750ms" in slow[0].detail
+
+
+def test_unexpected_redirect_candidate_for_target_mismatch() -> None:
+    result = _result(
+        url_before="https://ex.com/start",
+        url_after="https://ex.com/login",
+    )
+    redirect = [
+        c
+        for c in extract_qa_candidates(
+            result, _step(ExpectationKind.URL_CHANGE, target_url="https://ex.com/pricing")
+        )
+        if c.kind == "unexpected_redirect"
+    ]
+    assert len(redirect) == 1
+    assert redirect[0].severity is Severity.MAJOR
+    assert "pricing" in redirect[0].detail
+
+
+def test_expected_redirect_target_is_not_flagged() -> None:
+    result = _result(
+        url_before="https://ex.com/start",
+        url_after="https://ex.com/pricing#plans",
+    )
+    candidates = extract_qa_candidates(
+        result, _step(ExpectationKind.URL_CHANGE, target_url="/pricing")
+    )
+    assert not [c for c in candidates if c.kind == "unexpected_redirect"]
+
+
+def test_missing_validation_candidate_for_unmet_validation_expectation() -> None:
+    result = _result(ok=True)
+    candidate = validation_candidate(_step(ExpectationKind.VALIDATION_ERROR), result)
+    assert candidate is not None
+    assert candidate.kind == "missing_validation"
+    assert candidate.severity is Severity.MAJOR
+
+
+def test_no_missing_validation_candidate_for_other_expectations() -> None:
+    assert validation_candidate(_step(ExpectationKind.URL_CHANGE), _result(ok=True)) is None
 
 
 def test_dead_action_candidate_for_inert_click() -> None:

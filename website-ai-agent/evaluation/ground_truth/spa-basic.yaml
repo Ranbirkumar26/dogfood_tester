@@ -1,0 +1,5 @@
+# Ground truth for tests/fixtures/sites/spa-basic.
+site: spa-basic
+expected_reachable_pages: 1
+expected_interactive_elements: 2
+defects: []

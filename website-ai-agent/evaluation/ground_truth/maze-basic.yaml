@@ -1,0 +1,10 @@
+# Ground truth for tests/fixtures/sites/maze-basic.
+site: maze-basic
+expected_reachable_pages: 4
+expected_interactive_elements: 6
+defects:
+  - id: MAZE-001
+    kind: dead_navigation
+    location: "/dead-end.html"
+    severity: minor
+    notes: "dead-end.html intentionally exposes no interactive elements"

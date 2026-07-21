@@ -27,11 +27,16 @@ def _console_message(level: str = "error", text: str = "boom") -> SimpleNamespac
     return SimpleNamespace(type=level, text=text, location={"url": "https://ex.com/app.js"})
 
 
-def _response(status: int = 200, url: str = "https://ex.com/api") -> SimpleNamespace:
+def _response(
+    status: int = 200,
+    url: str = "https://ex.com/api",
+    *,
+    timing: dict[str, float] | None = None,
+) -> SimpleNamespace:
     return SimpleNamespace(
         url=url,
         status=status,
-        request=SimpleNamespace(method="GET", resource_type="fetch"),
+        request=SimpleNamespace(method="GET", resource_type="fetch", timing=timing),
     )
 
 
@@ -100,6 +105,17 @@ def test_network_observer_records_responses_and_failures(fixed_clock: FixedClock
     assert [(e.status, e.ok) for e in events] == [(200, True), (404, False), (None, False)]
     assert events[2].failure == "net::ERR_CONNECTION_REFUSED"
     assert observer.drain() == []
+
+
+def test_network_observer_records_response_duration(fixed_clock: FixedClock) -> None:
+    page = FakePage()
+    observer = NetworkObserver(fixed_clock)
+    observer.attach(page)
+
+    page.emit("response", _response(200, timing={"responseEnd": 321.5}))
+
+    [event] = observer.drain()
+    assert event.duration_ms == 321.5
 
 
 def test_network_observer_survives_hostile_objects(fixed_clock: FixedClock) -> None:

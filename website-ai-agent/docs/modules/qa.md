@@ -14,10 +14,10 @@ Layer 3: the deterministic QA engine. Turns a run's accumulated evidence into co
 
 Two families, all pure functions over `QaContext`:
 
-- **Candidate promotion**: `detect_from_candidates` turns the reviewer's per-step `QaCandidate`s (console errors, HTTP errors, dead actions) into findings, deduplicated across the whole run by kind and location, so a console error firing on every page is one finding.
+- **Candidate promotion**: `detect_from_candidates` turns the reviewer's per-step `QaCandidate`s (console errors, HTTP errors, dead actions, unexpected redirects, missing validation, slow requests) into findings, deduplicated across the whole run by kind and location, so a console error firing on every page is one finding.
 - **Snapshot analysis**: structural defects the per-step reviewer cannot see: `detect_missing_labels` (interactive controls with no accessible name, a real accessibility defect), `detect_duplicate_ids` (repeated author ids, invalid HTML), `detect_empty_pages` (visited pages with nothing interactive, possible dead navigation).
 
-Severity is assigned uniformly in the detectors: HTTP 5xx is critical, 4xx and console errors and missing labels are major, duplicate ids and dead ends are minor. Every finding carries a stable `dedupe_key` so the same defect collapses to one across steps, pages, and detectors.
+Severity is assigned uniformly in the detectors: HTTP 5xx is critical; 4xx, console errors, missing labels, unexpected redirects, and missing validation are major; duplicate ids, slow requests, and dead ends are minor. Every finding carries a stable `dedupe_key` so the same defect collapses to one across steps, pages, and detectors.
 
 ## Determinism
 

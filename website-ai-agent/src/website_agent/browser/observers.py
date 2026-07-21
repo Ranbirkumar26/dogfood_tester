@@ -81,6 +81,7 @@ class NetworkObserver:
                     status=response.status,
                     ok=response.status < 400,
                     resource_type=request.resource_type,
+                    duration_ms=_request_duration_ms(request),
                     at=self._clock.now(),
                 )
             )
@@ -108,3 +109,16 @@ class NetworkObserver:
         """Return and clear everything buffered since the last drain."""
         events, self._events = self._events, []
         return events
+
+
+def _request_duration_ms(request: Any) -> float | None:
+    """Best-effort request duration from Playwright timing data."""
+    timing = getattr(request, "timing", None)
+    if callable(timing):
+        timing = timing()
+    if not isinstance(timing, dict):
+        return None
+    response_end = timing.get("responseEnd")
+    if not isinstance(response_end, int | float) or response_end < 0:
+        return None
+    return float(response_end)

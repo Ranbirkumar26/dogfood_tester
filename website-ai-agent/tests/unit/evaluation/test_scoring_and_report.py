@@ -107,9 +107,22 @@ def test_dashboard_escapes_scenario_names() -> None:
 
 
 def test_load_committed_ground_truth_and_scenario() -> None:
-    truth = load_ground_truth(_ROOT / "evaluation" / "ground_truth" / "static-basic.yaml")
-    assert truth.site == "static-basic"
-    assert len(truth.defects) == 3
-    scenario = load_scenario(_ROOT / "evaluation" / "scenarios" / "explore-static-basic.yaml")
-    assert scenario.name == "explore-static-basic"
-    assert scenario.success.min_page_coverage == 0.6
+    truths = {
+        path.stem: load_ground_truth(path)
+        for path in sorted((_ROOT / "evaluation" / "ground_truth").glob("*.yaml"))
+    }
+    scenarios = [
+        load_scenario(path) for path in sorted((_ROOT / "evaluation" / "scenarios").glob("*.yaml"))
+    ]
+
+    assert set(truths) == {
+        "defects-basic",
+        "forms-basic",
+        "maze-basic",
+        "spa-basic",
+        "static-basic",
+    }
+    assert {scenario.site for scenario in scenarios} == set(truths)
+    assert truths["static-basic"].expected_reachable_pages == 3
+    assert len(truths["static-basic"].defects) == 3
+    assert all(scenario.max_steps > 0 for scenario in scenarios)

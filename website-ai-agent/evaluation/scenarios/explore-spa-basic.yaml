@@ -1,0 +1,11 @@
+# Explore a small client-routed page with hash navigation and a modal.
+name: explore-spa-basic
+site: spa-basic
+mode: explore
+max_steps: 25
+max_usd: 0.0
+max_wall_seconds: 240
+success:
+  min_page_coverage: 1.0
+  min_bug_recall: 0.0
+  min_bug_precision: 0.0

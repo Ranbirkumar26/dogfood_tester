@@ -21,7 +21,12 @@ from website_agent.llm.manager import ModelManager
 from website_agent.logging import get_logger
 from website_agent.planner.models import PlanStep
 from website_agent.prompts.manager import PromptManager
-from website_agent.reviewer.checks import check_mechanical, extract_qa_candidates, is_mechanical
+from website_agent.reviewer.checks import (
+    check_mechanical,
+    extract_qa_candidates,
+    is_mechanical,
+    validation_candidate,
+)
 from website_agent.reviewer.models import (
     QaCandidate,
     ReviewDecision,
@@ -63,7 +68,7 @@ class Reviewer:
             loop_limit: repeats at which a loop escalates from REPLAN to STOP.
             branch_poisoned: set when this branch was already force-replanned once.
         """
-        candidates = tuple(extract_qa_candidates(result))
+        candidates = tuple(extract_qa_candidates(result, step))
 
         guard = self._guard_decision(
             result, loop_repeats=loop_repeats, loop_limit=loop_limit, poisoned=branch_poisoned
@@ -90,6 +95,10 @@ class Reviewer:
             )
 
         judgement = await self._judge(step, result)
+        if not judgement.expectation_met:
+            validation = validation_candidate(step, result)
+            if validation is not None:
+                candidates = (*candidates, validation)
         reasons = (judgement.reasoning,) if judgement.reasoning else ()
         return self._verdict(
             step,

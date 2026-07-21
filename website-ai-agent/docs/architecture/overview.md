@@ -1,6 +1,6 @@
 # System Architecture Overview
 
-Status: Phase 1 (approved design, pre-implementation)
+Status: Implemented architecture, kept as the binding design contract
 Audience: contributors and reviewers. Every structural decision in this codebase traces back to a numbered decision (D1..D14) in this document.
 
 ## 1. What this system is

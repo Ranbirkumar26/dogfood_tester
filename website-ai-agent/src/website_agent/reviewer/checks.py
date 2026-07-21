@@ -9,6 +9,8 @@ spends an LLM call on genuinely semantic judgements (validation errors, content 
 
 from __future__ import annotations
 
+from urllib.parse import urldefrag, urljoin, urlsplit, urlunsplit
+
 from website_agent.core.types import Severity
 from website_agent.executor.models import ExecutionResult
 from website_agent.planner.models import ExpectationKind, PlanStep
@@ -21,6 +23,7 @@ _MECHANICAL = {
     ExpectationKind.DOWNLOAD,
     ExpectationKind.NO_CHANGE,
 }
+_SLOW_REQUEST_MS = 2_500.0
 
 
 def is_mechanical(kind: ExpectationKind) -> bool:
@@ -45,7 +48,9 @@ def check_mechanical(step: PlanStep, result: ExecutionResult) -> bool:
     return not result.url_changed and not observations.dialogs
 
 
-def extract_qa_candidates(result: ExecutionResult) -> list[QaCandidate]:
+def extract_qa_candidates(
+    result: ExecutionResult, step: PlanStep | None = None
+) -> list[QaCandidate]:
     """Deterministic defects from a step's observations and outcome."""
     candidates: list[QaCandidate] = []
     url = result.url_after
@@ -75,6 +80,37 @@ def extract_qa_candidates(result: ExecutionResult) -> list[QaCandidate]:
             )
         )
 
+    for request in result.observations.network:
+        if request.duration_ms is not None and request.duration_ms >= _SLOW_REQUEST_MS:
+            candidates.append(
+                QaCandidate(
+                    kind="slow_request",
+                    severity=Severity.MINOR,
+                    detail=(f"{request.method} {request.url} took {request.duration_ms:.0f}ms"),
+                    url=url,
+                    step_id=result.step_id,
+                )
+            )
+
+    if (
+        step is not None
+        and result.ok
+        and result.url_changed
+        and step.target_url
+        and not _same_url(result.url_after, urljoin(result.url_before, step.target_url))
+    ):
+        candidates.append(
+            QaCandidate(
+                kind="unexpected_redirect",
+                severity=Severity.MAJOR,
+                detail=(
+                    f"expected navigation to {step.target_url}, but ended at {result.url_after}"
+                ),
+                url=url,
+                step_id=result.step_id,
+            )
+        )
+
     # A click that changed nothing observable is a candidate dead action; the LLM verdict
     # decides the step outcome, but the dead-action signal is recorded regardless.
     if (
@@ -95,3 +131,38 @@ def extract_qa_candidates(result: ExecutionResult) -> list[QaCandidate]:
         )
 
     return candidates
+
+
+def validation_candidate(step: PlanStep, result: ExecutionResult) -> QaCandidate | None:
+    """Flag invalid-input flows that completed without the expected validation error."""
+    if step.expectation.kind is not ExpectationKind.VALIDATION_ERROR or not result.ok:
+        return None
+    return QaCandidate(
+        kind="missing_validation",
+        severity=Severity.MAJOR,
+        detail=(
+            f"expected a validation error after {step.action.value} on {step.label}, "
+            f"but none was observed"
+        ),
+        url=result.url_after,
+        step_id=result.step_id,
+    )
+
+
+def _same_url(left: str, right: str) -> bool:
+    return _normalize_url(left) == _normalize_url(right)
+
+
+def _normalize_url(value: str) -> str:
+    clean, _fragment = urldefrag(value)
+    parts = urlsplit(clean)
+    path = parts.path.rstrip("/") or "/"
+    return urlunsplit(
+        (
+            parts.scheme.lower(),
+            parts.netloc.lower(),
+            path,
+            parts.query,
+            "",
+        )
+    )

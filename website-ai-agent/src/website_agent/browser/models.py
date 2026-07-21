@@ -102,6 +102,7 @@ class NetworkEvent(BaseModel):
     ok: bool
     resource_type: str | None = None
     failure: str | None = None
+    duration_ms: float | None = None
     at: datetime
 
 

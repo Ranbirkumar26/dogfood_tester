@@ -60,7 +60,7 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/placeholder/website-ai-agent"
+Homepage = "https://github.com/Ranbirkumar26/dogfood_tester"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/website_agent"]

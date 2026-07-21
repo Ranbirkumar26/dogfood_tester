@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Forms Basic Fixture</title>
+</head>
+<body>
+  <main>
+    <h1>Forms Basic Fixture</h1>
+    <form id="signup" onsubmit="event.preventDefault(); document.getElementById('result').textContent = 'accepted:' + document.getElementById('email').value;">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" aria-describedby="email-help">
+      <p id="email-help">This fixture intentionally accepts malformed email.</p>
+      <button type="submit">Create account</button>
+    </form>
+    <form id="profile" onsubmit="event.preventDefault(); document.getElementById('profile-result').textContent = 'saved';">
+      <input id="display-name" name="display_name" type="text">
+      <button type="submit">Save profile</button>
+    </form>
+    <p id="result"></p>
+    <p id="profile-result"></p>
+  </main>
+</body>
+</html>

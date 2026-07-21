@@ -15,6 +15,16 @@ Dev tooling that scores agent runs against labeled ground truth. Not shipped in 
 | `scenarios/*.yaml` | scenario definitions (site, budgets, success thresholds) |
 | `ground_truth/*.yaml` | labeled defects and expected coverage per fixture site |
 
+## Bundled scenarios
+
+| Site | Focus |
+|---|---|
+| `static-basic` | baseline navigation, console error, HTTP error, missing label |
+| `forms-basic` | form validation and form-control accessibility |
+| `defects-basic` | console/network defects, duplicate ids, redirect handling |
+| `spa-basic` | client-side state changes, modals, hash navigation |
+| `maze-basic` | cyclic navigation and dead-end detection |
+
 ## Metrics
 
 Page and element coverage, navigation success rate, retry rate, loop frequency (per 100 steps), bug precision and recall (against ground truth), plus tokens, cost, LLM calls, screenshots, wall-clock, and steps. All are pure functions over `EvalEvidence`, so scores are reproducible and can be recomputed over any past run without re-exploring.
