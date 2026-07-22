@@ -12,6 +12,8 @@ screenshots, and writes reports that humans and machines can read.
 For the full long-form guide, see:
 
 - [website-ai-agent/README.md](website-ai-agent/README.md)
+- [AGENTS.md](AGENTS.md) for future LLM coding agents and vulnerability/risk context
+- [website-ai-agent/AGENTS.md](website-ai-agent/AGENTS.md) for project-folder agent context
 - [website-ai-agent/docs/FINAL_AUDIT.md](website-ai-agent/docs/FINAL_AUDIT.md)
 - [website-ai-agent/docs/architecture/overview.md](website-ai-agent/docs/architecture/overview.md)
 

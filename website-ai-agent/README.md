@@ -107,6 +107,10 @@ anything that is not present.
 
 Architecture docs start here: [docs/architecture/overview.md](docs/architecture/overview.md).
 
+For future LLM coding agents, read [AGENTS.md](AGENTS.md) and the repository-root
+[AGENTS.md](../AGENTS.md). They summarize architecture boundaries, commands, safety
+rules, and the vulnerability/risk map.
+
 ## Quick Start For Beginners
 
 This section assumes you have never run the project before.
